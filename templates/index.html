@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+      <!-- 引入 echarts.js -->
+    <script src="http://libs.baidu.com/jquery/1.7.2/jquery.min.js"></script>
+    <!-- 引入jquery.js -->
+    <script src="https://cdn.bootcss.com/echarts/4.1.0.rc2/echarts.min.js"></script>
+
+</head>
+<body>
+    <div id="main" style="width: 1800px;height: 900px;"></div>
+    <div id="main2" style="width: 1800px;height: 900px;"></div>
+    <div id="main3" style="width: 1800px;height: 900px;"></div>
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'));
+    var myChart1=echarts.init(document.getElementById('main2'));
+    var myChart2=echarts.init(document.getElementById('main3'));
+    var app={
+        //legname1:[],
+        ychinese1:[],
+        ymath1:[],
+        yenglish1:[],
+        xname1:[],
+        ynum1:[],
+        ynum21:[]
+    };
+    $(document).ready(function () {
+        getData();
+        //console.log(app.legname1);
+        console.log(app.ychinese1);
+        console.log(app.ymath1);
+        console.log(app.yenglish1);
+        console.log(app.xname1);
+        console.log(app.ynum1);
+        console.log(app.ynum21)
+    });
+    function  getData() {
+        $.ajax({
+            url:'/test',
+            data:{},
+            type:'POST',
+            async:false,
+            dataType:'json',
+            success:function (data) {
+                app.ychinese1 = data.ychinese;
+                app.ymath1 = data.ymath;
+                app.yenglish1 = data.yenglish;
+                app.xname1 = data.xname;
+                app.ynum1 = data.ynum;
+                app.ynum21 = data.ynum2;
+                myChart.setOption({
+                    title:{
+                        text:'学生成绩'
+                    },
+                    tooltip:{},
+                    legend:{
+                        data:['语文','数学','英语']
+                    },
+                    xAxis:{
+                        data:[{value:'张三',
+                        textStyle:{
+                            fontSize: 36
+                        }},
+                            {value:'李四',
+                                textStyle:{
+                                fontSize:36
+                                } },
+                            {value:'王五',
+                            textStyle:{
+                                fontSize:36
+                            }}],
+                        TextStyle:{
+                            fontSize:72
+                        }
+                    },
+                    yAxis:{
+                        type:'value'
+                    },
+                    series:[{
+                        name:'语文',
+                        type: 'bar',
+                        data:app.ychinese1
+                    },
+                        {
+                            name:'数学',
+                            type:'bar',
+                            data:app.ymath1
+                        },
+                        {
+                            name:'英语',
+                            type:'bar',
+                            data:app.yenglish1
+                        }]
+                });
+                myChart1.setOption({
+                    title:{
+                      text: '手机品牌价格'
+                    },
+                    tooltip: {},
+                    legend: {
+                       data:['手机店一','手机店二']
+                    },
+                    xAxis: {
+                        type: 'category',
+                        boundaryGap: false,
+                        data:app.xname1,
+                        axisLabel: {
+                        interval:0,
+                        rotate:40
+                    }
+                    },
+                    yAxis: {},
+                    series: [{
+                        name:'手机店一',
+                        type:'line',
+                        data:app.ynum1,
+                        label: {
+                            normal: {
+                                show: true,
+                                position: 'top'
+                            }
+                        },
+                        areaStyle: {}//填充
+                    },{
+                        name:'手机店二',
+                        type:'line',
+                        data:app.ynum21,
+                        label:{
+                            normal:{
+                                show:true,
+                                position:'top'
+                            }
+                        },
+                        areaStyle:{}
+                    }]
+                });
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                //定义一个for循环方便数据在下方引用
+                var indicator=[];
+                for(var i = 0;i<app.xname1.length;i++){
+                    indicator.push({
+                        name:app.xname1[i],max:8000
+                    })
+                }
+                //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                myChart2.setOption({
+
+                    title:{
+                        text:'手机价格雷达图'
+                    },
+                    tooltip:{},
+                    legend:{
+                        data:['商店一手机价格','商店二手机价格']
+                    },
+                    //雷达图样式设计
+                    radar:{
+                        //标签样式
+                        name:{
+                            textStyle:{
+                                fontSize:36
+                            }
+                        },
+                        //引用定义的for循环引用标签数据xname
+                        indicator:indicator
+                    },
+                    series:[{
+                        name:'商店一手机价格',
+                        type:'radar',
+                        //雷达图数值数据导入
+                        data:[
+                            {
+                                value:app.ynum1,
+                                name:'商店一手机价格'
+                            }
+                        ]
+                    },{
+                        name:'商店二手机价格',
+                        type:'radar',
+                        data:[
+                            {
+                                value:app.ynum21,
+                                name:'商店二手机价格'
+                            }
+                        ]
+                    }]
+                })
+            },
+            error:function (msg) {
+                console.log(msg);
+                alert('系统错误');
+            }
+        })
+
+    }
+</script>
+
+</body>
+</html>
+
+
