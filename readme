@@ -1,0 +1,6 @@
+download_finial_data.py
+从新浪下载每只股票的财务数据，包括，资产负债表，现金流量表，利润表
+下载到例如：/files/finance/年份/000001_平安银行/
+bs.xls - balancesheet
+cf.xls - cashflow
+ps.xls - profitstatement
