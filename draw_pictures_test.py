@@ -48,6 +48,7 @@ db.create_all()
 @app.route('/')
 def hello_world():
     return render_template('index.html')
+
 @app.route('/test',methods=['POST'])
 #链接数据库
 def my_test():

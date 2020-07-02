@@ -11,7 +11,8 @@ pro = ts.pro_api()
 resultList = []
 
 # analyse methods
-def analyzeStock(row,start_date,end_date):
+
+def analyzeStock(row,start_date,end_date,count):
     # print("IN ANALYSE...WITH CODE", str(row[0]))
     time.sleep(0.13)
     df = ts.pro_bar(ts_code=str(row[0]), start_date=str(start_date), end_date=str(end_date), ma=[5, 10, 20, 30, 60])
@@ -33,10 +34,14 @@ def analyzeStock(row,start_date,end_date):
         row = np.append(row, (maxNum - minNum) / maxNum)
 
         if (maxNum-minNum) < 0.02*maxNum:
-            print("*************BINGO!*************")
+
+            print("*************BINGO!*************", count)
             print(numList)
             print(row)
             resultList.append(row)
+            return 0
+
+        return 1
 
         # print(resultList)
 
@@ -44,8 +49,11 @@ def analyzeStock(row,start_date,end_date):
 # list all the stocks
 stocks = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
 
+# stocks = pro.hk_basic()
+
 # calculate average value one by one
-i = 0
+count = 0
+
 print("\n\n\nSTART..............ANALYSE\n")
 for row in stocks.values:
 
@@ -53,12 +61,12 @@ for row in stocks.values:
     today = time.strftime("%Y%m%d", time.localtime(time.time()))
     # today = time.strftime('%Y%m%d',time.localtime(time.time()))
     start = (datetime.date.today() - datetime.timedelta(days=120)).strftime("%Y%m%d")
-
     # print(today)
     # print(start)
     # print(row)
-    analyzeStock(row, start, today)
-    i=i+1
+    if analyzeStock(row, start, today,count) == 0:
+        count = count + 1
+
     # if i > 1000:
     #    break
 
@@ -66,7 +74,9 @@ file = open("files/ave_value.txt", "a")
 file.write("******************************************")
 file.write(time.strftime("%Y%m%d", time.localtime(time.time())))
 file.write("******************************************\n")
+
 for val in resultList:
+
     file.write(str(val))
     file.write("\n")
     # print(str(val))
