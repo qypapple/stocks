@@ -13,15 +13,15 @@ pro = ts.pro_api()
 
 #download financial data
 
-def download(row,dir):
+def download(code,name,dir):
 
-    url_1 = "http://money.finance.sina.com.cn/corp/go.php/vDOWN_BalanceSheet/displaytype/4/stockid/"+row[1]+"/ctrl/all.phtml"
-    url_2 = "http://money.finance.sina.com.cn/corp/go.php/vDOWN_ProfitStatement/displaytype/4/stockid/" + row[1] + "/ctrl/all.phtml"
-    url_3 = "http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/"+row[1] +"/ctrl/all.phtml"
+    url_1 = "http://money.finance.sina.com.cn/corp/go.php/vDOWN_BalanceSheet/displaytype/4/stockid/"+code+"/ctrl/all.phtml"
+    url_2 = "http://money.finance.sina.com.cn/corp/go.php/vDOWN_ProfitStatement/displaytype/4/stockid/" + code + "/ctrl/all.phtml"
+    url_3 = "http://money.finance.sina.com.cn/corp/go.php/vDOWN_CashFlow/displaytype/4/stockid/"+code +"/ctrl/all.phtml"
 
-    print("downloading with urllib " +row[1] + "_" + row[2])
+    print("downloading with urllib " +code + "_" + name)
 
-    new_dir = dir + row[1] + "_" + row[2]
+    new_dir = dir + code + "_" + name
     isExists = os.path.exists(new_dir)
     str_forbiden = '安全部门'
 
@@ -71,6 +71,8 @@ for row in stocks.values:
         i = i + 1
         continue
     else:
-        download(row, dir)
+        code = row[1]
+        name = row[2]
+        download(code, name, dir)
 
-download(stocks.values[i], dir)
+download(stocks.values[i][1], stocks.values[i][2],dir)
