@@ -1,12 +1,12 @@
 import pandas as pd
 from flask import Flask, request, jsonify
-import json
 import os
 import matplotlib.pyplot as plt
 import tushare as ts
 import numpy as np
 import datetime
-import time
+import time, json
+
 
 # init environment
 ts.set_token('464a66ad8b85aeba451b3703dad3e844cc0fcc6dba43321fe8de41da')
@@ -18,6 +18,13 @@ np.set_printoptions(suppress = True)
 pd.set_option('display.max_columns', None)
 #显示所有行
 pd.set_option('display.max_rows',None)
+
+rule_rough_net=0.4
+rule_roe=0.15
+rule_property=5000000000
+
+
+
 
 
 def read(code, names1, names2, names3, period, count):
@@ -132,7 +139,7 @@ def dataMatrix(code,names1,names2,names3,way,count):
             drop=True).astype(float)
         pure_income1.loc[5] = debt.loc[0] / total_assets.loc[0].values
 
-        print("pure_income:\n", pure_income1)
+
 
         return pure_income1
 
@@ -142,6 +149,26 @@ def dataMatrix(code,names1,names2,names3,way,count):
         return None
 
 
+def dfToJson(row, matrix,count):
+    df_json = matrix.to_json(orient='index', force_ascii=False)
+    jsn = {'index':count,'all_code':row[0], 'code':row[1], 'name':row[2], 'location':row[3], 'type':row[4], 'show_date':row[5], 'value':df_json}
+    return jsn
+
+def writeToFile(count,jsn):
+    file = open("files/fnl_report.txt", "a")
+    file.write("\n")
+    file.write(time.strftime("%Y%m%d", time.localtime(time.time())))
+    file.write("   ---   ")
+    file.write(str(count))
+    file.write("   --连续三年毛利率大于:   ")
+    file.write(str(rule_rough_net))
+    file.write("   --连续三年ROE大于:   ")
+    file.write(str(rule_roe))
+    file.write("   --总资产大于:   ")
+    file.write(str(rule_property))
+    file.write("\n")
+    file.write(str(jsn))
+    file.write("\n")
 
 
 # list all the stocks
@@ -156,49 +183,40 @@ names2 = ['报表日期', '一、营业收入', '营业收入', '营业成本', 
           '归属于母公司所有者的综合收益总额']
 names3 = ['报表日期', '经营活动现金流入小计', '投资活动现金流入小计', '筹资活动现金流入小计', '资产减值准备', '固定资产折旧、油气资产折耗、生产性物资折旧', '无形资产摊销',
           '现金及现金等价物的净增加额']
+result = []
 
-for row in stocks.values:
-    ts_code = str(row[0])
-    code = ts_code[0:6]
-    print("\n\n\nSTART..............ANALYSE\t", code, "\n\n")
-    pure_income1 = dataMatrix(code, names1, names2, names3, 'year', count)
-    if(pure_income1 is not None):
-        len1 = pure_income1.shape[1] #返回列数
-        if len1 > 2:  # 上市时间大于两年
-            if pure_income1.iloc[2, 0] > 0.15 and pure_income1.iloc[2, 1] > 0.15 and pure_income1.iloc[2, 2] > 0.15 \
-                    and pure_income1.iloc[3, 0] > 0.4 and pure_income1.iloc[3, 1] > 0.4 and pure_income1.iloc[
-                3, 2] > 0.4 \
-                    and pure_income1.iloc[4, 0] > 5000000000:
-                count = count + 1
-                pure_income1['数据名称'] = ['净利润', '所有者权益', 'ROE', '毛利率', '总资产', '负债率']
-                # print("pure_income1.iloc[2,0]",pure_income1.iloc[2,0])
-                # print("pure_income1.iloc[3,0]",pure_income1.iloc[3,0])
-                print("计算得出所有的值:\n{0}".format(pure_income1))
-                file = open("files/fnl_report.txt", "a")
-                file.write("\n")
-                file.write(time.strftime("%Y%m%d", time.localtime(time.time())))
-                file.write("   ---   ")
-                file.write(str(count))
-                file.write("\n")
-                file.write(str(row))
-                file.write("\n")
-                file.write("计算得出所有的值:\n{0}".format(pure_income1))
-        elif len1 > 1 and len1 <= 2:  # 上市时间满两年
-            print(stocks.values)
-            if pure_income1.iloc[2, 0] > 0.15 and pure_income1.iloc[2, 1] > 0.15 and pure_income1.iloc[3, 0] > 0.4 \
-                    and pure_income1.iloc[3, 1] > 0.4 and pure_income1.iloc[4, 0] > 5000000000:
-                count = count + 1
-                pure_income1['数据名称'] = ['净利润', '所有者权益', 'ROE', '毛利率', '总资产', '负债率']
-                # print("pure_income1.iloc[2,0]",pure_income1.iloc[2,0])
-                # print("pure_income1.iloc[3,0]",pure_income1.iloc[3,0])
-                print("计算得出所有的值:\n{0}".format(pure_income1))
-                file = open("files/fnl_report.txt", "a")
-                file.write("\n")
-                file.write(time.strftime("%Y%m%d", time.localtime(time.time())))
-                file.write("   ---   ")
-                file.write(str(count))
-                file.write("\n")
-                file.write(str(row))
-                file.write("\n")
-                file.write("计算得出所有的值:\n{0}".format(pure_income1))
+
+def all_stocks():
+    for row in stocks.values:
+        ts_code = str(row[0])
+        code = ts_code[0:6]
+        print("\n\n\nSTART..............ANALYSE\t", code, "\n\n")
+        pure_income1 = dataMatrix(code, names1, names2, names3, 'year', count)
+        if(pure_income1 is not None):
+            len1 = pure_income1.shape[1] #返回列数
+            if len1 > 2:  # 上市时间大于两年
+                if pure_income1.iloc[2, 0] > rule_roe and pure_income1.iloc[2, 1] > rule_roe and pure_income1.iloc[2, 2] > rule_roe \
+                        and pure_income1.iloc[3, 0] > rule_rough_net and pure_income1.iloc[3, 1] > rule_rough_net and pure_income1.iloc[
+                    3, 2] > rule_rough_net \
+                        and pure_income1.iloc[4, 0] > rule_property:
+                    count = count + 1
+                    pure_income1['type'] = ['净利润', '所有者权益', 'ROE', '毛利率', '总资产', '负债率']
+                    # print("pure_income1.iloc[2,0]",pure_income1.iloc[2,0])
+                    # print("pure_income1.iloc[3,0]",pure_income1.iloc[3,0])
+                    jsn = dfToJson(row, pure_income1,count)
+                    result.append(jsn)
+
+
+            elif len1 > 1 and len1 <= 2:  # 上市时间满两年
+                print(stocks.values)
+                if pure_income1.iloc[2, 0] > rule_roe and pure_income1.iloc[2, 1] > rule_roe and pure_income1.iloc[3, 0] > rule_rough_net \
+                        and pure_income1.iloc[3, 1] > rule_rough_net and pure_income1.iloc[4, 0] > rule_property:
+                    count = count + 1
+                    pure_income1['type'] = ['净利润', '所有者权益', 'ROE', '毛利率', '总资产', '负债率']
+                    # print("pure_income1.iloc[2,0]",pure_income1.iloc[2,0])
+                    # print("pure_income1.iloc[3,0]",pure_income1.iloc[3,0])
+                    jsn = dfToJson(row, pure_income1,count)
+                    result.append(jsn)
+    print("json得出所有的值:\n{0}".format(result))
+    writeToFile(count, result)
 
