@@ -6,7 +6,7 @@ import time
 import requests
 import os
 import sys
-
+#下载所有股票的财务xls
 # init environment
 ts.set_token('464a66ad8b85aeba451b3703dad3e844cc0fcc6dba43321fe8de41da')
 pro = ts.pro_api()
@@ -62,7 +62,7 @@ stocks = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,na
 
 i = 0
 print("\n\n\nSTART..............Download\n")
-dir="files/finance/2019/"
+dir="files/finance/2020Q2/"
 
 for row in stocks.values:
     new_dir1 = dir + row[1] + "_" + row[2]

@@ -1,12 +1,10 @@
 import pandas as pd
-from flask import Flask, request, jsonify
 import os
-import matplotlib.pyplot as plt
 import tushare as ts
 import numpy as np
-import datetime
-import time, json
+import time
 
+#在所有股票中找到财务数据漂亮的
 
 # init environment
 ts.set_token('464a66ad8b85aeba451b3703dad3e844cc0fcc6dba43321fe8de41da')
@@ -19,17 +17,17 @@ pd.set_option('display.max_columns', None)
 #显示所有行
 pd.set_option('display.max_rows',None)
 
-rule_rough_net=0.4
+rule_rough_net=0.35
 rule_roe=0.15
 rule_property=5000000000
 
-
+filepath = '/Users/yuqing/PycharmProjects/stocks/files/finance/2020Q2/'
 
 
 
 def read(code, names1, names2, names3, period, count):
     datalist = []
-    filepath = '/Users/yuqing/PycharmProjects/stocks/files/finance/2019/'
+
 
     dirlist = os.listdir(filepath)
 
@@ -96,6 +94,8 @@ def read(code, names1, names2, names3, period, count):
 
 def dataMatrix(code,names1,names2,names3,way,count):
 
+    print("Start to get financial data")
+
     datalist = read(code, names1, names2, names3, way, count)
 
     if len(datalist) > 0:
@@ -138,14 +138,10 @@ def dataMatrix(code,names1,names2,names3,way,count):
         debt = pd.DataFrame(df1[(df1['报表日期'].isin(['负债合计']))], columns=year).drop(['报表日期'], axis=1).reset_index(
             drop=True).astype(float)
         pure_income1.loc[5] = debt.loc[0] / total_assets.loc[0].values
-
-
-
         return pure_income1
 
     else:
         print("no data for this code")
-
         return None
 
 
@@ -187,10 +183,13 @@ result = []
 
 
 def all_stocks():
+    count = 0
     for row in stocks.values:
+
         ts_code = str(row[0])
         code = ts_code[0:6]
         print("\n\n\nSTART..............ANALYSE\t", code, "\n\n")
+
         pure_income1 = dataMatrix(code, names1, names2, names3, 'year', count)
         if(pure_income1 is not None):
             len1 = pure_income1.shape[1] #返回列数
@@ -203,7 +202,8 @@ def all_stocks():
                     pure_income1['type'] = ['净利润', '所有者权益', 'ROE', '毛利率', '总资产', '负债率']
                     # print("pure_income1.iloc[2,0]",pure_income1.iloc[2,0])
                     # print("pure_income1.iloc[3,0]",pure_income1.iloc[3,0])
-                    jsn = dfToJson(row, pure_income1,count)
+                    print(pure_income1)
+                    jsn = dfToJson(row, pure_income1, count)
                     result.append(jsn)
 
 
@@ -215,8 +215,8 @@ def all_stocks():
                     pure_income1['type'] = ['净利润', '所有者权益', 'ROE', '毛利率', '总资产', '负债率']
                     # print("pure_income1.iloc[2,0]",pure_income1.iloc[2,0])
                     # print("pure_income1.iloc[3,0]",pure_income1.iloc[3,0])
-                    jsn = dfToJson(row, pure_income1,count)
+                    print(pure_income1)
+                    jsn = dfToJson(row, pure_income1, count)
                     result.append(jsn)
     print("json得出所有的值:\n{0}".format(result))
     writeToFile(count, result)
-

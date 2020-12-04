@@ -4,6 +4,7 @@ import json
 import os
 import matplotlib.pyplot as plt
 
+#open flask api(not using)
 
 app = Flask(__name__)
 

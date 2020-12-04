@@ -4,7 +4,7 @@ import json
 import datetime
 import time
 import download_financial_data_report as dr
-
+#在所有股票中找到财务数据漂亮的
 # init environment
 ts.set_token('464a66ad8b85aeba451b3703dad3e844cc0fcc6dba43321fe8de41da')
 pro = ts.pro_api()
@@ -19,8 +19,8 @@ names2 = ['报表日期', '一、营业收入', '营业收入', '营业成本', 
           '归属于母公司所有者的综合收益总额']
 names3 = ['报表日期', '经营活动现金流入小计', '投资活动现金流入小计', '筹资活动现金流入小计', '资产减值准备', '固定资产折旧、油气资产折耗、生产性物资折旧', '无形资产摊销',
           '现金及现金等价物的净增加额']
-rule_rough_net=0.4
-rule_roe=0.1
+rule_rough_net=0.35
+rule_roe=0.15
 rule_property=1000000000
 def analyzeStock(row,start_date,end_date,count):
     # print("IN ANALYSE...WITH CODE", str(row[0]))
@@ -82,35 +82,42 @@ def analyzeStock(row,start_date,end_date,count):
                         print(str(rule_roe))
                         print("   --总资产大于:   ")
                         print(str(rule_property))
+
                         resultList.append(pure_income)
 
 
             print(numList)
             print(row)
             resultList.append(row)
-
+            file.write(str(row))
+            file.write("\n")
             return 0
 
         return 1
 
-        # print(resultList)
-
+#print(resultList)
 
 # list all the stocks
 stocks = pro.stock_basic(exchange='', list_status='L', fields='ts_code,symbol,name,area,industry,list_date')
+
+#selected = ['600598_北大荒','000998_隆平高科','600276_恒瑞医药','688981_中芯国际','600547_山东黄金','600859_王府井','603866_桃李面包','600127_金健米业']
 
 # stocks = pro.hk_basic()
 
 # calculate average value one by one
 count = 0
 
-print("\n\n\nSTART..............FIND STOCKS..........\n")
+print("\n\n\nSTART..............FIND STOCKS IN ALL..........\n")
+file = open("files/ave_value.txt", "a")
+file.write("******************************************")
+file.write(time.strftime("%Y%m%d", time.localtime(time.time())))
+file.write("******************************************\n")
+today = time.strftime("%Y%m%d", time.localtime(time.time()))
+start = (datetime.date.today() - datetime.timedelta(days=120)).strftime("%Y%m%d")
 for row in stocks.values:
 
     # print("\n\n\nSTART..............ANALYSE\n")
-    today = time.strftime("%Y%m%d", time.localtime(time.time()))
-    # today = time.strftime('%Y%m%d',time.localtime(time.time()))
-    start = (datetime.date.today() - datetime.timedelta(days=120)).strftime("%Y%m%d")
+
     # print(today)
     # print(start)
     # print(row)
@@ -120,18 +127,8 @@ for row in stocks.values:
     # if i > 1000:
     #    break
 
-file = open("files/ave_value.txt", "a")
-file.write("******************************************")
-file.write(time.strftime("%Y%m%d", time.localtime(time.time())))
-file.write("******************************************\n")
-
-for val in resultList:
-
-    file.write(str(val))
-    file.write("\n")
-    # print(str(val))
 file.write("\n\n\n")
 file.close()
-print(resultList)
+
 
 
