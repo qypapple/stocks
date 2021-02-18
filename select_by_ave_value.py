@@ -19,8 +19,8 @@ names2 = ['报表日期', '一、营业收入', '营业收入', '营业成本', 
           '归属于母公司所有者的综合收益总额']
 names3 = ['报表日期', '经营活动现金流入小计', '投资活动现金流入小计', '筹资活动现金流入小计', '资产减值准备', '固定资产折旧、油气资产折耗、生产性物资折旧', '无形资产摊销',
           '现金及现金等价物的净增加额']
-rule_rough_net=0.35
-rule_roe=0.15
+rule_rough_net=0.3
+rule_roe=0.2
 rule_property=1000000000
 def analyzeStock(row,start_date,end_date,count):
     # print("IN ANALYSE...WITH CODE", str(row[0]))
@@ -49,6 +49,8 @@ def analyzeStock(row,start_date,end_date,count):
             pure_income['type'] = ['净利润', '所有者权益', 'ROE', '毛利率', '总资产', '负债率']
 
             if (pure_income is not None):
+                print("ROE:")
+                print(pure_income.iloc[2, 1])
                 len1 = pure_income.shape[1]  # 返回列数
                 if len1 > 2:  # 上市时间大于两年
                     if pure_income.iloc[2, 0] > rule_roe and pure_income.iloc[2, 1] > rule_roe and pure_income.iloc[

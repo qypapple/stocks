@@ -36,16 +36,18 @@ def posibility_in_a_day(code, asset):
 
     return result
 
-#计算上一个月每天可能的成本降低百分比
+#计算上两周每天可能的成本降低百分比
 def posibility_in_two_week(code, asset):
+    print("上两周每天的差价：")
     today = time.strftime("%Y%m%d", time.localtime(time.time()))
     print(today)
     startDate = datetime.date.today()
     count=0
+    during=10
     result =[]
     # today = time.strftime('%Y%m%d',time.localtime(time.time()))
-    while count < 8:
-        end = (startDate - datetime.timedelta(days=7)).strftime("%Y%m%d")
+    while count < during:
+        end = (startDate - datetime.timedelta(days=during)).strftime("%Y%m%d")
         time.sleep(0.76)
         df = ts.pro_bar(ts_code=str(code), adj='qfq', start_date=str(end), end_date=str(startDate), asset=str(asset))
         if df is not None and not df.empty:
@@ -199,7 +201,7 @@ lower(86.321,800,'600276.SH','sh600276',moneybuy,'e')
 #
 print('000858.SZ 五粮液',"------------------------------------------------\n")
 file.write('\n\n000858.SZ 五粮液'+"------------------------------------------------\n")
-lower(265.389,1000,'000858.SZ','sz000858',moneybuy,'e')
+lower(278.321,1500,'000858.SZ','sz000858',moneybuy,'e')
 #
 #
 file.write("\n\n\n")
